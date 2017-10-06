@@ -1,6 +1,7 @@
 package Controller;
 
 import Model.Mem;
+import com.sun.xml.internal.bind.v2.TODO;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -15,34 +16,30 @@ import java.util.*;
 public class PhotoFromVk {
 
     private final String VK_TOKEN = "4148042bb790a3e640fd6bb2d1a5129a39736fa4f9d91121f2985c347260a9a0db6ddc64eb834ad8da023";
-    private final String groupID = "-57846937";
-    private final Integer COUNT = 100;
-    private Integer index;
 
-    private ArrayList<Mem>  memList = new ArrayList<Mem>();
+    private String listOfGroup[] = {"-57846937", "-45745333", "-36775802", "-66678575"};
+    private final Integer COUNT = 15;
 
-    public ArrayList<Mem> getList()
-    {
-        return memList;
-    }
+    private ArrayList<Mem>  memList = new ArrayList<>();
 
     public void setPhotos() {
+
         memList.clear();
 
         try {
-            URL url = new URL(
-                    "https://api.vk.com/method/wall.get?v=5.68&owner_id=" + groupID + "&count=" + COUNT + "&access_token=" + VK_TOKEN
-            );
 
-            URLConnection urlCon = url.openConnection();
+            for(int i = 0; i<listOfGroup.length; i++) {
 
-            InputStreamReader inputStreamReader = new InputStreamReader(urlCon.getInputStream());
+                URLConnection urlCon = generateUrl(listOfGroup[i], COUNT, VK_TOKEN).openConnection();
 
-            BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+                InputStreamReader inputStreamReader = new InputStreamReader(urlCon.getInputStream());
 
-            String input = bufferedReader.readLine();
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
 
-            parse(input);
+                String input = bufferedReader.readLine();
+
+                parse(input);
+            }
 
         } catch (MalformedURLException e) {
             e.printStackTrace();
@@ -52,47 +49,59 @@ public class PhotoFromVk {
     }
 
     public Mem getMem() {
-        return memList.get(new Random().nextInt(memList.size()));
+        int index = new Random().nextInt(memList.size());
+        return memList.get(index);
+        //memList.remove(index);
     }
 
-    private void parse(final String s) {
+//    public boolean isEmptyList(){
+//        System.out.println("Залишилось "+memList.size()+" мемів.");
+//        if(memList.isEmpty()) {
+//            return true;
+//        }else{
+//            return false;
+//        }
+//    }
 
-        //System.out.println(s);
+//    public Integer getListSize(){
+//        return memList.size();
+//    }
+
+    private void parse(final String s) {
 
         JSONObject obj = new JSONObject(s);
         JSONObject response  = obj.getJSONObject("response");
 
-        JSONArray items = response.getJSONArray("items"); // Массив сайтов
+        JSONArray items = response.getJSONArray("items"); // Massive of items
 
         for (int i = 0; i < items.length(); i++) {
             JSONObject temp = items.getJSONObject(i);
 
-            String post_type = temp.getString("post_type");
-            //System.out.println("post_type -"+post_type);
-
             String text = temp.getString("text");
-            //System.out.println("text -"+text);
 
-            JSONArray attachments = temp.optJSONArray("attachments"); //Массив альбомов
+            JSONArray attachments = temp.optJSONArray("attachments"); //Massive of attachments
 
-            if (attachments != null && attachments.length()<2) {
+            if (attachments != null && attachments.length()<2) { //Only one attachment
 
                 JSONObject temp2 = attachments.getJSONObject(0);
-                    if (temp2.getString("type").equals("photo")) {
+
+                if (temp2.getString("type").equals("photo")) {  //Only photo
                         JSONObject photo = attachments.getJSONObject(0).getJSONObject("photo");
                         String photo_604 = photo.getString("photo_604");
-                       // System.out.println("url  - "+photo_604);
                         if(!text.equals("")){
                             memList.add(new Mem(photo_604, text));
                         }else   memList.add(new Mem(photo_604, "null1"));
-                    }
-                    //else System.out.println("не фото");
                 }
-                //else System.out.println("lenght()>1");
-
-            //System.out.println("------------------------------------");
+            }
         }
     }
+
+    private URL generateUrl (String groupID, Integer count, String accessToken) throws MalformedURLException {
+       return new  URL("https://api.vk.com/method/wall.get?v=5.68&owner_id=" + groupID + "&count=" + count + "&access_token=" +accessToken);
+    }
+
+
+
 }
 
 

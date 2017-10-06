@@ -1,6 +1,7 @@
 package Model;
 
 public class Mem {
+
     private String photoUrl;
     private String textToPhoto;
 

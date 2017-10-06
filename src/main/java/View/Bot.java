@@ -13,7 +13,9 @@ import org.telegram.telegrambots.exceptions.TelegramApiException;
 public class Bot extends TelegramLongPollingBot {
 
     private final static String NAME_OF_BOT = "MemchykBot";
-    private final static String BOT_TOKEN = "461379082:AAEfA-5WVb2MdXSpbpgfTqM6wqvV9Lglcsk";
+    private final static String BOT_TOKEN = "461379082:AAEfA-5WVb2MdXSpbpgfTqM6wqvV9Lglcsk";   // - origin
+    //private final static String BOT_TOKEN = "464633497:AAHsenmRI80F2syHxPjnUyNnRboQdR5M-pU"; // - test
+
 
     private UserMarkup userMarkup = new UserMarkup();
     private PhotoFromVk photoFromVk = new PhotoFromVk();
@@ -22,20 +24,28 @@ public class Bot extends TelegramLongPollingBot {
         Message message = update.getMessage();
 
         if(message.getText().equals("/start")){
-                sendMsg(message, "Тисни \"Хочу мемас\" щоб отримати порцію сміхоти :)", userMarkup);
+                sendMsg(message, "" +
+                        "Найкращі меми з MDK, 4ch, Орленок, Овсянка, сэр." +
+                        "\n Тисни \"Хочу мемас\" щоб отримати порцію сміхоти :)." +
+                        "\n Помітив помилку? Пиши - @draxvel", userMarkup);
         }
         else
             if(message.getText().equals("Хочу мемас")){
                 photoFromVk.setPhotos();
+//                if(photoFromVk.isEmptyList()){
+//                    photoFromVk.setPhotos();
+//                    sendMsg(message, "Отримано "+photoFromVk.getListSize()+ " нових мемів!" +
+//                            "Меми можуть ", userMarkup);
+//                }
                 Mem mem = photoFromVk.getMem();
-                //System.out.println(mem.getTextToPhoto());
 
                 if(mem.getTextToPhoto() != "null1") {
                     sendMsg(message, mem.getTextToPhoto(), userMarkup);
                 }
                 sendPhoto(message,mem.getPhotoUrl(), userMarkup);
             }
-        else{
+        else
+            {
                 sendMsg(message, "Упсс.. помилка", userMarkup);
             }
     }
@@ -54,6 +64,7 @@ public class Bot extends TelegramLongPollingBot {
     }
 
     private void sendPhoto(Message message, String photoUrl, ReplyKeyboardMarkup replyKeyboardMarkup){
+
         SendPhoto sPhoto = new SendPhoto();
         sPhoto.setChatId(message.getChatId().toString());
         sPhoto.setReplyMarkup(replyKeyboardMarkup);
